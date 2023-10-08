@@ -35,6 +35,7 @@ EgoBody
 ├── Egohmr_scene_preprocess_cube_s2_from_gt_release
 ├── Egohmr_scene_preprocess_cube_s2_from_pred_release
 ├── annotation_egocentric_smpl_npz
+├── transf_matrices_all_seqs.pkl
 ```
 
 **Download trained checkpoints and other data:**
