@@ -7,7 +7,8 @@ Official PyTorch code for EgoHMR: Probabilistic Human Mesh Recovery in 3D Scenes
 
 <img src="images/teaser.jpg" width = 900 align=middle>
 
-
+### News
+**[June 08, 2025]** We have provided support for [VolumetricSMPL](https://markomih.github.io/VolumetricSMPL/) with faster collision guidance during inference. Please check Section [Stage 2] for details.
 
 ## Installation
 Creating a clean conda environment and install all dependencies by:
@@ -140,7 +141,6 @@ Available configs:
 * `vis_o3d`: if set to `True`, visualize the predicted 3D body mesh in the 3D scene with `open3d`
 * `vis_o3d_gt`: if set to `True`, visualize the ground truth body together
 * `save_pred_transl`: if set to `True`, save predicted body translation to `save_root`
-
 * `num_samples`: number of samples to draw for each input image
 * `timestep_respacing_eval`: choose from `ddim5/ddpm`, 
 `ddim5` denostes using ddim sampling with 5 steps, 
@@ -155,9 +155,15 @@ and body pose for invisible parts from the results conditioned only on the scene
 If you want multiple samples for each image (with large-scale testing purpose), 
 running multiple jobs with each job set as `num_samples=1` could be more efficient.
 
-
 You can find the sampled results (in the same the configurations as reported in the paper) 
 in `output_results_release/output_egohmr_91453`, with 5 samples for each input image.
+
+
+**Test with VolumetricSMPL collision guidance:** test EgoHMR on EgoBody with [VolumetricSMPL](https://github.com/markomih/VolumetricSMPL/tree/main) for human-scene collision test-time guidance, with faster inference speed: 
+```
+python test_egohmr_volsmpl.py --dataset_root=PATH/TO/DATASET  --save_pred_transl=PATH/TO/SAVE/PRED/TRANSL
+```
+
 
 ## Citation
 If you find this work useful, please cite:

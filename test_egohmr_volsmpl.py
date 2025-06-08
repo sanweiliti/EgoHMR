@@ -15,7 +15,7 @@ from utils.geometry import *
 from dataloaders.egobody_dataset import DatasetEgobody
 from utils.geometry import perspective_projection
 
-from models.egohmr.egohmr import EgoHMR
+from models.egohmr.egohmr_volsmpl import EgoHMRVolsmpl
 from diffusion.model_util import create_gaussian_diffusion
 
 
@@ -58,8 +58,8 @@ parser.add_argument('--scene_type', type=str, default='cube', choices=['whole_sc
 parser.add_argument("--num_diffusion_timesteps", default=50, type=int, help='total steps for diffusion')
 parser.add_argument('--timestep_respacing_eval', type=str, default='ddpm', choices=['ddim5', 'ddpm'], help='ddim/ddpm sampling schedule')
 parser.add_argument('--diffuse_fuse', default='True', type=lambda x: x.lower() in ['true', '1'], help='if to use classifier-free sampling')
-parser.add_argument('--with_coap_grad', default='True', type=lambda x: x.lower() in ['true', '1'], help='if use collision-guided sampling')
-parser.add_argument('--cond_grad_weight', type=float, default=2.0, help='weight for collision gradient')
+parser.add_argument('--with_volsmpl_grad', default='True', type=lambda x: x.lower() in ['true', '1'], help='if use collision-guided sampling')
+parser.add_argument('--cond_grad_weight', type=float, default=30.0, help='weight for collision gradient')
 parser.add_argument('--only_mask_img_cond', default='True', type=lambda x: x.lower() in ['true', '1'],
                     help='only mask img features during trainig with cond_mask_prob')
 parser.add_argument('--pelvis_vis_loosen', default='True', type=lambda x: x.lower() in ['true', '1'],
@@ -109,7 +109,7 @@ def test():
     preprocess_stats = np.load(os.path.join(logdir, 'preprocess_stats/preprocess_stats.npz'))
     body_rep_mean = torch.from_numpy(preprocess_stats['Xmean']).float().to(device)
     body_rep_std = torch.from_numpy(preprocess_stats['Xstd']).float().to(device)
-    model = EgoHMR(cfg=model_cfg, device=device,
+    model = EgoHMRVolsmpl(cfg=model_cfg, device=device,
                    body_rep_mean=body_rep_mean, body_rep_std=body_rep_std,
                    with_focal_length=args.with_focal_length, with_bbox_info=args.with_bbox_info,
                    with_cam_center=args.with_cam_center,
@@ -252,10 +252,10 @@ def test():
                 out_cur_sample = diffusion_sample.val_losses(model=model, batch=batch, shape=shape, progress=False,
                                                              clip_denoised=False, cur_epoch=0,
                                                              timestep_respacing=args.timestep_respacing_eval,
-                                                             cond_fn_with_grad=args.with_coap_grad, cond_grad_weight=args.cond_grad_weight)
+                                                             cond_fn_with_grad=args.with_volsmpl_grad, cond_grad_weight=args.cond_grad_weight)
                 if args.eval_coll_loss:
                     ######## calculate human-scene collision metric
-                    coll_ratio_list = model.eval_coll(out_cur_sample)  # [bs]
+                    coll_ratio_list = model.eval_coll_volsmpl(out_cur_sample)  # [bs]
                     coll_ratio_list = np.array(coll_ratio_list)
                     coll_ratio_list_all[step * args.batch_size:step * args.batch_size + curr_batch_size, n] = coll_ratio_list
                 for key in out_cur_sample['pred_smpl_params'].keys():
